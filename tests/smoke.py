@@ -25,7 +25,7 @@ def check(page, width):
 
     page.locator('input[name="ziel"][value="Muskelaufbau"]').check()
     page.locator('input[name="erfahrung"][value="Einsteiger"]').check()
-    page.locator('input[name="beschwerden"][value="Keine Angabe"]').check()
+    # The complaints question is voluntary: submit without selecting any health answer.
     page.locator('input[name="zeit"][value="2-mal"]').check()
     page.locator('input[name="ort"][value="im Studio"]').check()
     show = page.get_by_role("button", name="Erste Orientierung anzeigen")
@@ -33,9 +33,10 @@ def check(page, width):
     show.click()
     assert page.get_by_role("heading", name="Dein möglicher Einstieg").is_visible()
     assert page.locator("[data-quiz-steps] li").count() == 4
+    assert not page.locator("[data-quiz-note]").is_visible()
     link = page.locator("[data-quiz-send]").get_attribute("href")
     assert "wa.me/" in link
-    for answer in ("Muskelaufbau", "Einsteiger", "Keine Angabe", "2-mal", "Studio"):
+    for answer in ("Muskelaufbau", "Einsteiger", "2-mal", "Studio"):
         assert answer.lower() not in link.lower(), "Answers leaked into WhatsApp link"
     assert not errors, f"JavaScript errors: {errors}"
     page.screenshot(path=str(ARTIFACTS / f"home-{width}.png"), full_page=True)
