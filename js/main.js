@@ -219,6 +219,8 @@
   var quiz = document.querySelector("[data-quiz]");
   if (quiz) {
     var FIELDS = ["ziel", "erfahrung", "beschwerden", "zeit", "ort"];
+    // Health information is optional. Every other answer is needed for the orientation.
+    var REQUIRED = ["ziel", "erfahrung", "zeit", "ort"];
     var countEl = quiz.querySelector("[data-quiz-count]");
     var resultEl = quiz.querySelector("[data-quiz-result]");
     var stepsEl = quiz.querySelector("[data-quiz-steps]");
@@ -266,14 +268,15 @@
       var a = readAnswers();
       var n = FIELDS.filter(function (f) { return a[f]; }).length;
       countEl.textContent = String(n);
-      showEl.disabled = n < FIELDS.length;
+      var ready = REQUIRED.every(function (f) { return !!a[f]; });
+      showEl.disabled = !ready;
       quiz.style.setProperty("--q", String(n / FIELDS.length));
       goalEl.textContent = a.ziel || "noch offen";
       goalEditEl.textContent = a.ziel ? "ändern" : "oben wählen";
       if (nextEl) nextEl.hidden = !a.ziel;
       // Visitors who jump straight to #check never saw question 1 in the hero
-      missingEl.hidden = !(n === FIELDS.length - 1 && !a.ziel);
-      if (n < FIELDS.length) {
+      missingEl.hidden = !(REQUIRED.filter(function (f) { return !!a[f]; }).length === REQUIRED.length - 1 && !a.ziel);
+      if (!ready) {
         resultEl.hidden = true;
         return;
       }
@@ -290,7 +293,7 @@
         li.textContent = t;
         stepsEl.appendChild(li);
       });
-      noteEl.hidden = a.beschwerden === "Keine" || a.beschwerden === "Keine Angabe";
+      noteEl.hidden = !a.beschwerden || a.beschwerden === "Keine" || a.beschwerden === "Keine Angabe";
 
       // Deliberately independent of every answer, including health information.
       var msg = "Hallo Adrian, ich interessiere mich für ein Erstgespräch.";
@@ -346,8 +349,8 @@
       var a = readAnswers();
       var n = FIELDS.filter(function (f) { return a[f]; }).length;
       var line = (SAYS[name] && SAYS[name][value]) || "";
-      if (n === FIELDS.length) line = "Alles beantwortet. Du kannst jetzt deine erste Orientierung anzeigen.";
-      else if (n === FIELDS.length - 1 && !a.ziel) line = "Eins fehlt noch: dein Ziel, ganz oben.";
+      if (REQUIRED.every(function (f) { return !!a[f]; })) line = "Du kannst jetzt deine erste Orientierung anzeigen.";
+      else if (REQUIRED.filter(function (f) { return !!a[f]; }).length === REQUIRED.length - 1 && !a.ziel) line = "Eins fehlt noch: dein Ziel, ganz oben.";
       if (line) coachText.textContent = line;
     };
     // Narrow screens: the coach bar shows while the form is on screen
