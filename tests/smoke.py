@@ -41,9 +41,9 @@ def check(page, width):
     assert not errors, f"JavaScript errors: {errors}"
     page.screenshot(path=str(ARTIFACTS / f"home-{width}.png"), full_page=True)
     page.goto(BASE + "/impressum.html")
-    assert page.locator("main.legal h1").inner_text().strip() == "Impressum"
+    assert page.locator("main.legal h1").text_content().strip() == "Impressum"
     page.goto(BASE + "/datenschutz.html")
-    assert "Datenschutzerklärung" in page.locator("main.legal h1").inner_text().replace("\u00ad", "")
+    assert "Datenschutzerklärung" in page.locator("main.legal h1").text_content().replace("\u00ad", "")
     assert not errors, f"JavaScript errors: {errors}"
 
 with sync_playwright() as playwright:
