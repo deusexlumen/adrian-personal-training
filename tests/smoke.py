@@ -17,7 +17,7 @@ def check(page, width):
     assert page.locator("img.hero__avatar").evaluate(
         "img => img.complete && img.naturalWidth > 0"), "Avatar not loaded"
     if width <= 900:
-        menu = page.get_by_role("button", name="Menü öffnen")
+        menu = page.locator("[data-nav-toggle]")
         menu.click()
         assert menu.get_attribute("aria-expanded") == "true"
         page.locator(".site-nav").get_by_role("link", name="Angebot").click()
